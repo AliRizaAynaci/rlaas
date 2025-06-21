@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os/signal"
+	"rlaas/internal/limiter"
 	"syscall"
 	"time"
 
@@ -39,6 +40,9 @@ func gracefulShutdown(apiServer *http.Server, done chan bool) {
 
 func main() {
 
+	// Sharding'i initialize et
+	limiter.InitSharding()
+	log.Println("Redis sharding initialized")
 	server := server.NewServer()
 
 	// Create a done channel to signal when the shutdown is complete

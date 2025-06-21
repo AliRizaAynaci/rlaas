@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"rlaas/internal/server/handlers"
 )
 
 func (s *Server) RegisterRoutes() http.Handler {
@@ -11,8 +12,23 @@ func (s *Server) RegisterRoutes() http.Handler {
 
 	// Register routes
 	mux.HandleFunc("/", s.HelloWorldHandler)
+	mux.HandleFunc("/health", s.HealthHandler)
 
-	mux.HandleFunc("/health", s.healthHandler)
+	// RLAAS routes
+	mux.HandleFunc("/register", handlers.RegisterProjectHandler)
+	mux.HandleFunc("/check", handlers.RateLimitCheck)
+	mux.HandleFunc("/rules", handlers.GetRules)
+	mux.HandleFunc("/rule/add", handlers.AddRule)
+	mux.HandleFunc("/rule/", func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method {
+		case http.MethodDelete:
+			handlers.DeleteRule(w, r)
+		case http.MethodPut:
+			handlers.UpdateRule(w, r)
+		default:
+			http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		}
+	})
 
 	// Wrap the mux with CORS middleware
 	return s.corsMiddleware(mux)
@@ -50,7 +66,7 @@ func (s *Server) HelloWorldHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (s *Server) healthHandler(w http.ResponseWriter, r *http.Request) {
+func (s *Server) HealthHandler(w http.ResponseWriter, r *http.Request) {
 	resp, err := json.Marshal(s.db.Health())
 	if err != nil {
 		http.Error(w, "Failed to marshal health check response", http.StatusInternalServerError)
