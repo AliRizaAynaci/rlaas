@@ -2,9 +2,9 @@ package server
 
 import (
 	"encoding/json"
+	"github.com/AliRizaAynaci/rlaas/internal/server/handlers"
 	"log"
 	"net/http"
-	"rlaas/internal/server/handlers"
 )
 
 func (s *Server) RegisterRoutes() http.Handler {

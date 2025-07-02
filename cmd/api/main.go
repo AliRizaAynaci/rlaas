@@ -3,14 +3,14 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/AliRizaAynaci/rlaas/internal/limiter"
 	"log"
 	"net/http"
 	"os/signal"
-	"rlaas/internal/limiter"
 	"syscall"
 	"time"
 
-	"rlaas/internal/server"
+	"github.com/AliRizaAynaci/rlaas/internal/server"
 )
 
 func gracefulShutdown(apiServer *http.Server, done chan bool) {

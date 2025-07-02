@@ -2,9 +2,9 @@ package handlers
 
 import (
 	"encoding/json"
+	"github.com/AliRizaAynaci/rlaas/internal/limiter"
+	"github.com/AliRizaAynaci/rlaas/internal/service"
 	"net/http"
-	"rlaas/internal/limiter"
-	"rlaas/internal/service"
 )
 
 // CheckRequest represents the rate limit check request structure

@@ -9,7 +9,7 @@ import (
 
 	_ "github.com/joho/godotenv/autoload"
 
-	"rlaas/internal/database"
+	"github.com/AliRizaAynaci/rlaas/internal/database"
 )
 
 type Server struct {

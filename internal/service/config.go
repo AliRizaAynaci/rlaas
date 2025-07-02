@@ -3,9 +3,9 @@ package service
 import (
 	"context"
 	"github.com/AliRizaAynaci/gorl/core"
+	"github.com/AliRizaAynaci/rlaas/internal/database"
+	"github.com/AliRizaAynaci/rlaas/internal/limiter"
 	"os"
-	"rlaas/internal/database"
-	"rlaas/internal/limiter"
 	"time"
 )
 

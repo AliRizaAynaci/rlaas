@@ -3,8 +3,8 @@ package service
 import (
 	"context"
 	"fmt"
+	"github.com/AliRizaAynaci/rlaas/internal/database"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"rlaas/internal/database"
 )
 
 var dbPool *pgxpool.Pool

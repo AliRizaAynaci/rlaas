@@ -3,8 +3,8 @@ package service
 import (
 	"context"
 	"fmt"
-	"rlaas/internal/database"
-	"rlaas/internal/models"
+	"github.com/AliRizaAynaci/rlaas/internal/database"
+	"github.com/AliRizaAynaci/rlaas/internal/models"
 )
 
 func GetProjectByAPIKey(apiKey string) (*models.Project, error) {

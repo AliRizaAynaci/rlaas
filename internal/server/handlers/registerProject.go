@@ -2,8 +2,8 @@ package handlers
 
 import (
 	"encoding/json"
+	"github.com/AliRizaAynaci/rlaas/internal/service"
 	"net/http"
-	"rlaas/internal/service"
 )
 
 type RegisterRequest struct {
