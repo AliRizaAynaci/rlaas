@@ -2,6 +2,7 @@ package server
 
 import (
 	"encoding/json"
+	"github.com/AliRizaAynaci/rlaas/internal/middleware"
 	"github.com/AliRizaAynaci/rlaas/internal/server/handlers"
 	"log"
 	"net/http"
@@ -14,21 +15,43 @@ func (s *Server) RegisterRoutes() http.Handler {
 	mux.HandleFunc("/", s.HelloWorldHandler)
 	mux.HandleFunc("/health", s.HealthHandler)
 
-	// RLAAS routes
-	mux.HandleFunc("/register", handlers.RegisterProjectHandler)
-	mux.HandleFunc("/check", handlers.RateLimitCheck)
-	mux.HandleFunc("/rules", handlers.GetRules)
-	mux.HandleFunc("/rule/add", handlers.AddRule)
-	mux.HandleFunc("/rule/", func(w http.ResponseWriter, r *http.Request) {
-		switch r.Method {
-		case http.MethodDelete:
-			handlers.DeleteRule(w, r)
-		case http.MethodPut:
-			handlers.UpdateRule(w, r)
-		default:
-			http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
-		}
-	})
+	// --- Public Auth & Check ---
+	mux.HandleFunc("/auth/google/login", handlers.LoginHandler)       // GET  /auth/google/login
+	mux.HandleFunc("/auth/google/callback", handlers.CallbackHandler) // GET  /auth/google/callback
+	mux.HandleFunc("/check", handlers.RateLimitCheck)                 // POST /check
+
+	// --- Project Creation ---
+	// Creates a new project and returns API key
+	mux.Handle("/register",
+		middleware.AuthMiddleware(
+			http.HandlerFunc(handlers.RegisterProjectHandler),
+		),
+	)
+
+	// --- Rate-Limit Rules (aka Endpoints) ---
+	// List all rules for the API-key in Authorization header
+	mux.Handle("/rules",
+		middleware.AuthMiddleware(http.HandlerFunc(handlers.GetRules)),
+	)
+	// Add a new rule
+	mux.Handle("/rule/add",
+		middleware.AuthMiddleware(http.HandlerFunc(handlers.AddRule)),
+	)
+	// Update or delete an existing rule by ID:
+	//   PUT    /rule/{id}
+	//   DELETE /rule/{id}
+	mux.Handle("/rule/",
+		middleware.AuthMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			switch r.Method {
+			case http.MethodPut:
+				handlers.UpdateRule(w, r)
+			case http.MethodDelete:
+				handlers.DeleteRule(w, r)
+			default:
+				http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+			}
+		})),
+	)
 
 	// Wrap the mux with CORS middleware
 	return s.corsMiddleware(mux)

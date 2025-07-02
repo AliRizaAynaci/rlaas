@@ -28,13 +28,32 @@ func GetProjectByAPIKey(apiKey string) (*models.Project, error) {
 	return &project, nil
 }
 
-func CreateProject(name, apiKey string) error {
-	db, err := database.GetInstance()
+func CreateProject(ctx context.Context, userID int, name, apiKey string) (*models.Project, error) {
+	// DB servisini al
+	dbSvc, err := database.GetInstance()
 	if err != nil {
-		return fmt.Errorf("db error: %w", err)
+		return nil, fmt.Errorf("db error: %w", err)
 	}
 
-	query := `INSERT INTO projects (name, api_key) VALUES ($1, $2)`
-	_, err = db.Pool().Exec(context.Background(), query, name, apiKey)
-	return err
+	const q = `
+      INSERT INTO projects (user_id, name, api_key)
+      VALUES ($1, $2, $3)
+      RETURNING id, user_id, name, api_key, created_at
+    `
+	var p models.Project
+	err = dbSvc.Pool().QueryRow(ctx, q,
+		userID,
+		name,
+		apiKey,
+	).Scan(
+		&p.ID,
+		&p.UserID,
+		&p.Name,
+		&p.ApiKey,
+		&p.CreatedAt,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("CreateProject: %w", err)
+	}
+	return &p, nil
 }
