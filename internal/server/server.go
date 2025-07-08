@@ -2,6 +2,9 @@ package server
 
 import (
 	"fmt"
+	"github.com/AliRizaAynaci/rlaas/internal/logging"
+	"github.com/AliRizaAynaci/rlaas/internal/middleware"
+	"log/slog"
 	"net/http"
 	"os"
 	"strconv"
@@ -20,16 +23,22 @@ type Server struct {
 
 func NewServer() *http.Server {
 	port, _ := strconv.Atoi(os.Getenv("PORT"))
-	NewServer := &Server{
+	logging.L.Info("Starting RLaaS server", // log at startup
+		slog.Int("port", port), // attach port as key–value
+	)
+
+	srv := &Server{
 		port: port,
 
 		db: database.New(),
 	}
 
+	loggedHandler := middleware.LoggingMiddleware(srv.RegisterRoutes())
+
 	// Declare Server config
 	server := &http.Server{
-		Addr:         fmt.Sprintf(":%d", NewServer.port),
-		Handler:      NewServer.RegisterRoutes(),
+		Addr:         fmt.Sprintf(":%d", srv.port),
+		Handler:      loggedHandler,
 		IdleTimeout:  time.Minute,
 		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 30 * time.Second,

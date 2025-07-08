@@ -2,10 +2,13 @@ package handlers
 
 import (
 	"encoding/json"
-	"github.com/AliRizaAynaci/rlaas/internal/service"
+	"log/slog"
 	"net/http"
 	"strconv"
 	"strings"
+
+	"github.com/AliRizaAynaci/rlaas/internal/logging"
+	"github.com/AliRizaAynaci/rlaas/internal/service"
 )
 
 // RuleResponse represents the rule structure that will be sent to the frontend
@@ -172,6 +175,13 @@ func DeleteRule(w http.ResponseWriter, r *http.Request) {
 	// Delete the rule
 	err = service.DeleteRule(ruleID, project.ID)
 	if err != nil {
+		// 1) Log the failure with context
+		logging.L.Warn("Failed to delete rate limit rule",
+			slog.String("component", "rules"),
+			slog.Int("rule_id", ruleID),
+			slog.String("error", err.Error()),
+		)
+		// 2) Return the HTTP error as before
 		http.Error(w, "Failed to delete rule", http.StatusInternalServerError)
 		return
 	}

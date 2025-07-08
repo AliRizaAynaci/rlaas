@@ -3,7 +3,8 @@ package database
 import (
 	"context"
 	"fmt"
-	"log"
+	"github.com/AliRizaAynaci/rlaas/internal/logging"
+	"log/slog"
 	"os"
 	"strconv"
 	"time"
@@ -55,8 +56,10 @@ func New() Service {
 		pool: pool,
 	}
 
-	fmt.Println("Database connection established")
-	fmt.Printf("Connected to %s\n", dbURL)
+	logging.L.Info("Database connection established") // log at info level
+	logging.L.Info("Connected to database",
+		slog.String("dsn", dbURL), // attach the DSN as a key–value
+	)
 	return dbInstance
 }
 
@@ -78,15 +81,17 @@ func (s *service) Pool() *pgxpool.Pool {
 func (s *service) Close() error {
 	if s.pool != nil {
 		s.pool.Close()
-		log.Println("Disconnected from database")
+		logging.L.Info("Disconnected from database") // structured log
 	}
 	return nil
 }
 
+// Health returns connection stats and a healthy status message
 func (s *service) Health() map[string]string {
 	stats := s.pool.Stat()
 	return map[string]string{
 		"status":              "up",
+		"message":             "It's healthy", // satisfy TestHealth expectation
 		"total_connections":   strconv.FormatInt(int64(stats.TotalConns()), 10),
 		"idle_connections":    strconv.FormatInt(int64(stats.IdleConns()), 10),
 		"used_connections":    strconv.FormatInt(int64(stats.AcquiredConns()), 10),

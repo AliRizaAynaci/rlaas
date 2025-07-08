@@ -10,6 +10,7 @@ import (
 	"github.com/AliRizaAynaci/gorl/core"
 )
 
+// RateLimitConfig holds the options for rate limiting (strategy, limit, window, vs.) :contentReference[oaicite:0]{index=0}
 type RateLimitConfig struct {
 	Strategy     core.StrategyType
 	KeyBy        core.KeyFuncType
@@ -23,10 +24,13 @@ type RedisClusterConfig struct {
 	Strategy string   `json:"strategy"` // "hash_mod", "consistent_hash"
 }
 
+// ConfigKey uniquely identifies a limiter configuration including rate and window :contentReference[oaicite:1]{index=1}
 type ConfigKey struct {
-	ApiKey   string
-	Endpoint string
-	ShardKey string
+	ApiKey   string        // client’s API key
+	Endpoint string        // requested endpoint
+	ShardKey string        // the Redis shard URL
+	Limit    int           // number of allowed requests per window
+	Window   time.Duration // time window duration (e.g. 1m, 10s)
 }
 
 type Limiter struct {
@@ -72,6 +76,8 @@ func GetLimiterForKey(apiKey, endpoint, userKey string, baseConfig RateLimitConf
 		ApiKey:   apiKey,
 		Endpoint: endpoint,
 		ShardKey: redisURL,
+		Limit:    baseConfig.Limit,
+		Window:   baseConfig.Window,
 	}
 
 	mu.Lock()

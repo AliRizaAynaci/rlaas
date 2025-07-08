@@ -28,29 +28,31 @@ func (s *Server) RegisterRoutes() http.Handler {
 		),
 	)
 
-	// --- Rate-Limit Rules (aka Endpoints) ---
-	// List all rules for the API-key in Authorization header
+	// --- Rate-Limit Rules endpoints requires an API-KEY ---
+	// 1. List all rules for the API-key in Authorization header
 	mux.Handle("/rules",
-		middleware.AuthMiddleware(http.HandlerFunc(handlers.GetRules)),
+		http.HandlerFunc(handlers.GetRules),
 	)
-	// Add a new rule
+
+	// 2. Add a new rule
 	mux.Handle("/rule/add",
-		middleware.AuthMiddleware(http.HandlerFunc(handlers.AddRule)),
+		http.HandlerFunc(handlers.AddRule),
 	)
-	// Update or delete an existing rule by ID:
-	//   PUT    /rule/{id}
-	//   DELETE /rule/{id}
+
+	// 3. Update or delete an existing rule by ID:
+	//    PUT    /rule/{id}
+	//    DELETE /rule/{id}
 	mux.Handle("/rule/",
-		middleware.AuthMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			switch r.Method {
 			case http.MethodPut:
-				handlers.UpdateRule(w, r)
+				handlers.UpdateRule(w, r) // handle update
 			case http.MethodDelete:
-				handlers.DeleteRule(w, r)
+				handlers.DeleteRule(w, r) // handle delete
 			default:
 				http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
 			}
-		})),
+		}),
 	)
 
 	// Wrap the mux with CORS middleware

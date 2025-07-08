@@ -4,7 +4,8 @@ import (
 	"context"
 	"fmt"
 	"github.com/AliRizaAynaci/rlaas/internal/limiter"
-	"log"
+	"github.com/AliRizaAynaci/rlaas/internal/logging"
+	"log/slog"
 	"net/http"
 	"os/signal"
 	"syscall"
@@ -21,7 +22,7 @@ func gracefulShutdown(apiServer *http.Server, done chan bool) {
 	// Listen for the interrupt signal.
 	<-ctx.Done()
 
-	log.Println("shutting down gracefully, press Ctrl+C again to force")
+	logging.L.Info("Shutting down gracefully, press Ctrl+C again to force")
 	stop() // Allow Ctrl+C to force shutdown
 
 	// The context is used to inform the server it has 5 seconds to finish
@@ -29,10 +30,12 @@ func gracefulShutdown(apiServer *http.Server, done chan bool) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	if err := apiServer.Shutdown(ctx); err != nil {
-		log.Printf("Server forced to shutdown with error: %v", err)
+		logging.L.Error("Forced shutdown error",
+			slog.String("error", err.Error()),
+		)
 	}
 
-	log.Println("Server exiting")
+	logging.L.Info("Server exiting")
 
 	// Notify the main goroutine that the shutdown is complete
 	done <- true
@@ -40,9 +43,8 @@ func gracefulShutdown(apiServer *http.Server, done chan bool) {
 
 func main() {
 
-	// Sharding'i initialize et
 	limiter.InitSharding()
-	log.Println("Redis sharding initialized")
+	logging.L.Info("Redis sharding initialized")
 	server := server.NewServer()
 
 	// Create a done channel to signal when the shutdown is complete
@@ -58,5 +60,5 @@ func main() {
 
 	// Wait for the graceful shutdown to complete
 	<-done
-	log.Println("Graceful shutdown complete.")
+	logging.L.Info("Graceful shutdown complete")
 }

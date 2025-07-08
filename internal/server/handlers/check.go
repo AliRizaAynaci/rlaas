@@ -2,9 +2,12 @@ package handlers
 
 import (
 	"encoding/json"
-	"github.com/AliRizaAynaci/rlaas/internal/limiter"
-	"github.com/AliRizaAynaci/rlaas/internal/service"
+	"log/slog"
 	"net/http"
+
+	"github.com/AliRizaAynaci/rlaas/internal/limiter"
+	"github.com/AliRizaAynaci/rlaas/internal/logging"
+	"github.com/AliRizaAynaci/rlaas/internal/service"
 )
 
 // CheckRequest represents the rate limit check request structure
@@ -46,6 +49,14 @@ func RateLimitCheck(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if !allowed {
+		// 1) Log the rate‐limit hit
+		logging.L.Warn("Rate limit exceeded",
+			slog.String("component", "limiter"),
+			slog.String("api_key", req.ApiKey),
+			slog.String("endpoint", req.Endpoint),
+			slog.String("key", req.Key),
+		)
+		// 2) Return the HTTP 429
 		http.Error(w, "Rate Limit Exceeded", http.StatusTooManyRequests)
 		return
 	}
