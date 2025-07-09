@@ -179,6 +179,8 @@ func DeleteRule(w http.ResponseWriter, r *http.Request) {
 		logging.L.Warn("Failed to delete rate limit rule",
 			slog.String("component", "rules"),
 			slog.Int("rule_id", ruleID),
+			slog.Int("project_id", project.ID),
+			slog.String("api_key", apiKey),
 			slog.String("error", err.Error()),
 		)
 		// 2) Return the HTTP error as before

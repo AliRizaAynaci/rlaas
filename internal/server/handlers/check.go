@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"errors"
 	"log/slog"
 	"net/http"
 
@@ -30,9 +31,17 @@ func RateLimitCheck(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	config, ok := service.GetRateLimitConfig(req.ApiKey, req.Endpoint)
-	if !ok {
-		http.Error(w, "Config not found", http.StatusNotFound)
+	config, err := service.GetRateLimitConfig(req.ApiKey, req.Endpoint)
+	if errors.Is(err, service.ErrProjectNotFound) {
+		http.Error(w, "Invalid API key", http.StatusUnauthorized)
+		return
+	}
+	if errors.Is(err, service.ErrEndpointNotOwned) {
+		http.Error(w, "Endpoint does not belong to this project", http.StatusForbidden)
+		return
+	}
+	if err != nil {
+		http.Error(w, "Internal error", http.StatusInternalServerError)
 		return
 	}
 
