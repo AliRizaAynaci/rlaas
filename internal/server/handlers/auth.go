@@ -84,5 +84,5 @@ func CallbackHandler(w http.ResponseWriter, r *http.Request) {
 		// Secure:   true, // for production
 	})
 
-	http.Redirect(w, r, "/dashboard", http.StatusSeeOther)
+	http.Redirect(w, r, "http://localhost:3000/dashboard", http.StatusSeeOther)
 }

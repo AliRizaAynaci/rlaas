@@ -19,6 +19,15 @@ func (s *Server) RegisterRoutes() http.Handler {
 	mux.HandleFunc("/auth/google/login", handlers.LoginHandler)       // GET  /auth/google/login
 	mux.HandleFunc("/auth/google/callback", handlers.CallbackHandler) // GET  /auth/google/callback
 	mux.HandleFunc("/check", handlers.RateLimitCheck)                 // POST /check
+	mux.HandleFunc("/logout", handlers.LogoutHandler)                 // GET  /logout
+
+	// --- Protected Auth endpoints ---
+	// Get current user info (requires authentication)
+	mux.Handle("/me",
+		middleware.AuthMiddleware(
+			http.HandlerFunc(handlers.MeHandler),
+		),
+	)
 
 	// --- Project Creation ---
 	// Creates a new project and returns API key
@@ -55,17 +64,23 @@ func (s *Server) RegisterRoutes() http.Handler {
 		}),
 	)
 
+	mux.Handle("/projects",
+		middleware.AuthMiddleware(
+			http.HandlerFunc(handlers.ListProjectsHandler),
+		),
+	)
+
 	// Wrap the mux with CORS middleware
 	return s.corsMiddleware(mux)
 }
 
 func (s *Server) corsMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Set CORS headers
-		w.Header().Set("Access-Control-Allow-Origin", "*") // Replace "*" with specific origins if needed
+		// Set CORS headers for frontend integration
+		w.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000") // Frontend URL
 		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS, PATCH")
 		w.Header().Set("Access-Control-Allow-Headers", "Accept, Authorization, Content-Type, X-CSRF-Token")
-		w.Header().Set("Access-Control-Allow-Credentials", "false") // Set to "true" if credentials are required
+		w.Header().Set("Access-Control-Allow-Credentials", "true") // Enable credentials for cookie-based auth
 
 		// Handle preflight OPTIONS requests
 		if r.Method == http.MethodOptions {

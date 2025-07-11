@@ -5,6 +5,7 @@ import (
 	"github.com/AliRizaAynaci/rlaas/internal/middleware"
 	"github.com/AliRizaAynaci/rlaas/internal/service"
 	"net/http"
+	"time"
 )
 
 type RegisterRequest struct {
@@ -39,4 +40,34 @@ func RegisterProjectHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(RegisterResponse{ApiKey: proj.ApiKey})
+}
+
+type ProjectResponse struct {
+	ID        int    `json:"id"`
+	Name      string `json:"name"`
+	APIKey    string `json:"api_key"`
+	CreatedAt string `json:"created_at"` // RFC3339 format
+}
+
+func ListProjectsHandler(w http.ResponseWriter, r *http.Request) {
+	userID := middleware.FromContext(r.Context())
+
+	projects, err := service.GetProjectsByUserID(r.Context(), userID)
+	if err != nil {
+		http.Error(w, "Failed to fetch projects", http.StatusInternalServerError)
+		return
+	}
+
+	resp := make([]ProjectResponse, len(projects))
+	for i, p := range projects {
+		resp[i] = ProjectResponse{
+			ID:        p.ID,
+			Name:      p.Name,
+			APIKey:    p.ApiKey,
+			CreatedAt: p.CreatedAt.Format(time.RFC3339),
+		}
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(resp)
 }

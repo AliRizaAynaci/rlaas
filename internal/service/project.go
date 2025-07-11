@@ -57,3 +57,36 @@ func CreateProject(ctx context.Context, userID int, name, apiKey string) (*model
 	}
 	return &p, nil
 }
+
+const listProjectsSQL = `
+    SELECT id, name, api_key, created_at
+    FROM projects
+    WHERE user_id = $1
+    ORDER BY created_at DESC;
+`
+
+func GetProjectsByUserID(ctx context.Context, userID int) ([]models.Project, error) {
+	dbSvc, err := database.GetInstance()
+	if err != nil {
+		return nil, err
+	}
+
+	rows, err := dbSvc.Pool().Query(ctx, listProjectsSQL, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	projects := make([]models.Project, 0)
+	for rows.Next() {
+		var p models.Project
+		if err := rows.Scan(&p.ID, &p.Name, &p.ApiKey, &p.CreatedAt); err != nil {
+			return nil, err
+		}
+		projects = append(projects, p)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return projects, nil
+}
