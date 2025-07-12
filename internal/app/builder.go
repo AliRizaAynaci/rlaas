@@ -2,10 +2,12 @@ package app
 
 import (
 	"log"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 
+	"github.com/AliRizaAynaci/rlaas/internal/app/health"
 	"github.com/AliRizaAynaci/rlaas/internal/auth"
 	"github.com/AliRizaAynaci/rlaas/internal/check"
 	"github.com/AliRizaAynaci/rlaas/internal/config"
@@ -45,9 +47,14 @@ func New() *fiber.App {
 	projHdl := project.NewHandler(projSvc)
 	ruleHdl := rule.NewHandler(ruleSvc)
 	checkH := check.NewHandler(rateCfgSvc)
+	healthH := health.New(db)
 
 	/* ------------ Fiber ------------ */
 	app := fiber.New()
+	srv := app.Server()
+	srv.ReadTimeout = 10 * time.Second
+	srv.WriteTimeout = 15 * time.Second
+	app.Use(middleware.RequestLogger())
 
 	app.Use(cors.New(cors.Config{
 		AllowOrigins:     "http://localhost:3000",
@@ -57,6 +64,9 @@ func New() *fiber.App {
 	}))
 
 	/* ------------ Public routes ------------ */
+	app.Get("/healthz", healthH.Liveness) // liveness
+	app.Get("/readyz", healthH.Readiness) // readiness
+
 	app.Get("/auth/google/login", auth.Login)
 	app.Get("/auth/google/callback", auth.Callback(userSvc))
 	app.Get("/logout", auth.Logout)
