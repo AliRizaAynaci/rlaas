@@ -30,6 +30,10 @@ func env(k, def string) string {
 }
 
 func buildDSN() string {
+	if url := os.Getenv("DATABASE_URL"); url != "" {
+		return url
+	}
+
 	host := env("DB_HOST", "localhost")
 	port := env("DB_PORT", "5432")
 	user := env("DB_USERNAME", "postgres")
