@@ -1,0 +1,49 @@
+version: "3.9"
+
+services:
+  # ---------- Database ----------
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB:       ${DB_DATABASE:-rlaas}
+      POSTGRES_USER:     ${DB_USERNAME:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-password}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    volumes:
+      - psql_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ---------- Redis Shards ----------
+  redis_node_1:
+    image: redis:7-alpine
+    hostname: redis_node_1
+    command: redis-server --appendonly yes
+    ports: [ "6379:6379" ]
+    volumes: [ redis_node_1_data:/data ]
+
+  redis_node_2:
+    image: redis:7-alpine
+    hostname: redis_node_2
+    command: redis-server --appendonly yes
+    ports: [ "6380:6379" ]
+    volumes: [ redis_node_2_data:/data ]
+
+  redis_node_3:
+    image: redis:7-alpine
+    hostname: redis_node_3
+    command: redis-server --appendonly yes
+    ports: [ "6381:6379" ]
+    volumes: [ redis_node_3_data:/data ]
+
+volumes:
+  psql_data:
+  redis_node_1_data:
+  redis_node_2_data:
+  redis_node_3_data:

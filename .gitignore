@@ -1,0 +1,68 @@
+# -------------------------------------------------
+# ▶️ Go build artifacts
+# -------------------------------------------------
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+
+# go run / go build cache
+/build/
+/bin/
+*.tmp
+
+# Go modules cache (when vendoring is off)
+pkg/mod/
+# vendor directory (if you use go mod vendor, remove this!)
+vendor/
+
+# Coverage & profiling
+*.coverprofile
+*.cov
+*.prof
+coverage.out
+
+# -------------------------------------------------
+# 🐳 Docker & Compose
+# -------------------------------------------------
+# Local override files, generated envs
+docker-compose.override.yml
+docker-compose.*.yml
+.docker/
+
+# -------------------------------------------------
+# ⚙️ Config / Secrets
+# -------------------------------------------------
+.env
+.env.*        # .env.dev, .env.prod …
+*.local.env
+*.key
+*.pem
+
+# -------------------------------------------------
+# 📝 Logs & misc
+# -------------------------------------------------
+*.log
+logs/
+*.pid
+tmp/
+
+# -------------------------------------------------
+# 🖥️ IDE / Editor metadata
+# -------------------------------------------------
+.vscode/
+.idea/
+*.sw?
+*.swo
+*.swn
+*.sublime-*
+*.code-workspace
+
+# -------------------------------------------------
+# 🖼  OS stuff
+# -------------------------------------------------
+.DS_Store
+Thumbs.db
