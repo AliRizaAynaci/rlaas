@@ -4,6 +4,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/AliRizaAynaci/rlaas/internal/logging"
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v5"
 )
@@ -35,6 +36,7 @@ func Auth() fiber.Handler {
 			return secret, nil
 		})
 		if err != nil || !tok.Valid {
+			logging.L.Error("JWT parse failed", "err", err)
 			return fiber.ErrUnauthorized
 		}
 
