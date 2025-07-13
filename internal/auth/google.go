@@ -108,7 +108,8 @@ func Callback(svc *user.Service) fiber.Handler {
 			Value:    signed,
 			Path:     "/",
 			HTTPOnly: true,
-			// Secure: true, // enable in production
+			Secure:   true,
+			SameSite: "None",
 		})
 
 		frontendRedirect := os.Getenv("FRONTEND_REDIRECT_URL")
