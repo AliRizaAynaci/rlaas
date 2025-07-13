@@ -111,6 +111,10 @@ func Callback(svc *user.Service) fiber.Handler {
 			// Secure: true, // enable in production
 		})
 
-		return c.Redirect("http://localhost:3000/dashboard", fiber.StatusSeeOther)
+		frontendRedirect := os.Getenv("FRONTEND_REDIRECT_URL")
+		if frontendRedirect == "" {
+			frontendRedirect = "http://localhost:3000/dashboard" // fallback
+		}
+		return c.Redirect(frontendRedirect, fiber.StatusSeeOther)
 	}
 }
