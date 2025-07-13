@@ -106,7 +106,7 @@ func Callback(svc *user.Service) fiber.Handler {
 		c.Cookie(&fiber.Cookie{
 			Name:     "session_token",
 			Value:    signed,
-			Domain:   "api.rlaas.tech", // ← bu satırı ekleyin
+			Domain:   ".rlaas.tech",
 			Path:     "/",
 			HTTPOnly: true,
 			SameSite: "None",
