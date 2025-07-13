@@ -1,76 +1,37 @@
+version: '3.8'
+
 services:
-  # ---------- API ----------
   api:
-    build: .                    
+    build: .
     container_name: rlaas_api
-    ports: ["8080:8080"]
+    ports:
+      - "${PORT:-8080}:8080"
     restart: unless-stopped
 
     env_file: .env
     environment:
-      APP_ENV: ${APP_ENV:-dev}
-      DB_HOST: db
-      DB_PORT: 5432
-      REDIS_SHARDS: redis_node_1:6379,redis_node_2:6379,redis_node_3:6379
+      # App config
+      APP_ENV:        ${APP_ENV}
+      PORT:           ${PORT}
 
-    depends_on:
-      db:
-        condition: service_healthy
-      redis_node_1:
-        condition: service_started
-      redis_node_2:
-        condition: service_started
-      redis_node_3:
-        condition: service_started
+      # Postgres (RDS)
+      DATABASE_URL:   ${DATABASE_URL}
+
+      # Rate limiting & RedisCloud
+      SHARDING_STRATEGY: ${SHARDING_STRATEGY}
+      REDIS_NODE_1:      ${REDISCLOUD_URL}
+
+      # OAuth & JWT
+      GOOGLE_CLIENT_ID:     ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      OAUTH_REDIRECT_URL:   ${OAUTH_REDIRECT_URL}
+      JWT_SECRET:           ${JWT_SECRET}
+
+      # Migrations
+      MIGRATE_ON_START: ${MIGRATE_ON_START}
 
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/healthz"]
       interval: 30s
       timeout: 5s
       retries: 3
-
-  # ---------- Database ----------
-  db:
-    image: postgres:16-alpine
-    container_name: rlaas_db
-    restart: unless-stopped
-    environment:
-      POSTGRES_DB:       ${DB_DATABASE:-rlaas}
-      POSTGRES_USER:     ${DB_USERNAME:-postgres}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-password}
-      PGDATA: /var/lib/postgresql/data/pgdata
-    ports: ["${DB_PORT:-5432}:5432"]
-    volumes: [ psql_data:/var/lib/postgresql/data ]
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER}"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-  # ---------- Redis Shards ----------
-  redis_node_1:
-    image: redis:7-alpine
-    hostname: redis_node_1
-    command: redis-server --appendonly yes
-    ports: [ "6379:6379" ]
-    volumes: [ redis_node_1_data:/data ]
-
-  redis_node_2:
-    image: redis:7-alpine
-    hostname: redis_node_2
-    command: redis-server --appendonly yes
-    ports: [ "6380:6379" ]
-    volumes: [ redis_node_2_data:/data ]
-
-  redis_node_3:
-    image: redis:7-alpine
-    hostname: redis_node_3
-    command: redis-server --appendonly yes
-    ports: [ "6381:6379" ]
-    volumes: [ redis_node_3_data:/data ]
-
-volumes:
-  psql_data:
-  redis_node_1_data:
-  redis_node_2_data:
-  redis_node_3_data:
