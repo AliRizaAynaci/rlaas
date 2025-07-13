@@ -15,6 +15,7 @@ func (h *Handler) Handle(c *fiber.Ctx) error {
 	var req struct {
 		APIKey   string `json:"api_key"`
 		Endpoint string `json:"endpoint"`
+		Key      string `json:"key"`
 	}
 	if err := c.BodyParser(&req); err != nil {
 		return fiber.ErrBadRequest
@@ -31,10 +32,8 @@ func (h *Handler) Handle(c *fiber.Ctx) error {
 		return fiber.ErrInternalServerError
 	}
 
-	groupKey := c.IP()
-
-	lim, _ := limiter.GetLimiterForKey(req.APIKey, req.Endpoint, groupKey, cfg)
-	allowed, _ := lim.Allow(groupKey)
+	lim, _ := limiter.GetLimiterForKey(req.APIKey, req.Endpoint, req.Key, cfg)
+	allowed, _ := lim.Allow(req.Key)
 	if !allowed {
 		return fiber.NewError(fiber.StatusTooManyRequests, "Rate limit exceeded")
 	}

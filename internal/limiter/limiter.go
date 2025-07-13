@@ -92,7 +92,7 @@ func GetLimiterForKey(apiKey, endpoint, userKey string, baseConfig RateLimitConf
 		KeyBy:    baseConfig.KeyBy,
 		Limit:    baseConfig.Limit,
 		Window:   baseConfig.Window,
-		RedisURL: redisURL,
+		RedisURL: os.Getenv("REDISCLOUD_URL"),
 	})
 	if err != nil {
 		return nil, err
