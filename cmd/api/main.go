@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"net/http"
+	"os"
 	"os/signal"
 	"syscall"
 	"time"
@@ -51,7 +52,13 @@ func main() {
 	done := make(chan bool, 1)
 	go gracefulShutdown(app, done)
 
-	if err := app.Listen(":8080"); err != nil && !errors.Is(err, http.ErrServerClosed) {
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080" // local fallback
+	}
+	logging.L.Info("Starting server on port", "port", port)
+
+	if err := app.Listen(":" + port); err != nil && !errors.Is(err, http.ErrServerClosed) {
 		logging.L.Error("http server error", "err", err)
 	}
 
