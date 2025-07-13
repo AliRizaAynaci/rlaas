@@ -28,7 +28,7 @@ func Auth() fiber.Handler {
 			}
 		}
 		if tokenStr == "" {
-			log.Fatal("TOKENSTR IS EMPTY")
+			log.Println("TOKENSTR IS EMPTY")
 			return fiber.ErrUnauthorized
 		}
 
@@ -37,7 +37,7 @@ func Auth() fiber.Handler {
 			return secret, nil
 		})
 		if err != nil || !tok.Valid {
-			log.Fatal("JWT PARSE FAILED: ", err)
+			log.Println("JWT PARSE FAILED: ", err)
 			return fiber.ErrUnauthorized
 		}
 

@@ -57,7 +57,7 @@ func New() *fiber.App {
 	app.Use(middleware.RequestLogger())
 
 	app.Use(cors.New(cors.Config{
-		AllowOrigins:     "http://localhost:3000,https://rlaas-aab98221ceb7.herokuapp.com",
+		AllowOrigins:     "https://rlaas.tech/",
 		AllowMethods:     "GET,POST,PUT,DELETE,OPTIONS,PATCH",
 		AllowHeaders:     "Accept, Authorization, Content-Type, X-CSRF-Token",
 		AllowCredentials: true,
