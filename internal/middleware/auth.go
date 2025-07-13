@@ -1,10 +1,10 @@
 package middleware
 
 import (
+	"log"
 	"os"
 	"strings"
 
-	"github.com/AliRizaAynaci/rlaas/internal/logging"
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v5"
 )
@@ -28,6 +28,7 @@ func Auth() fiber.Handler {
 			}
 		}
 		if tokenStr == "" {
+			log.Fatal("TOKENSTR IS EMPTY")
 			return fiber.ErrUnauthorized
 		}
 
@@ -36,7 +37,7 @@ func Auth() fiber.Handler {
 			return secret, nil
 		})
 		if err != nil || !tok.Valid {
-			logging.L.Error("JWT parse failed", "err", err)
+			log.Fatal("JWT PARSE FAILED: ", err)
 			return fiber.ErrUnauthorized
 		}
 
