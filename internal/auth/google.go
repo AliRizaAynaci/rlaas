@@ -108,7 +108,6 @@ func Callback(svc *user.Service) fiber.Handler {
 			Value:    signed,
 			Path:     "/",
 			HTTPOnly: true,
-			Domain:   ".rlaas.tech",
 			SameSite: "None",
 			Secure:   true,
 		})
