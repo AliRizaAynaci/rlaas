@@ -115,7 +115,7 @@ func Callback(svc *user.Service) fiber.Handler {
 
 		frontendRedirect := os.Getenv("FRONTEND_REDIRECT_URL")
 		if frontendRedirect == "" {
-			frontendRedirect = "http://localhost:3000/dashboard" // fallback
+			frontendRedirect = "http://rlaas.tech/dashboard" // fallback
 		}
 		return c.Redirect(frontendRedirect, fiber.StatusSeeOther)
 	}
