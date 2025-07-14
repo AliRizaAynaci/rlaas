@@ -2,6 +2,7 @@ package app
 
 import (
 	"log"
+	"os"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -57,7 +58,7 @@ func New() *fiber.App {
 	app.Use(middleware.RequestLogger())
 
 	app.Use(cors.New(cors.Config{
-		AllowOrigins:     "https://rlaas.tech",
+		AllowOrigins:     os.Getenv("FRONTEND_URI"),
 		AllowMethods:     "GET,POST,PUT,DELETE,OPTIONS,PATCH",
 		AllowHeaders:     "Accept, Authorization, Content-Type, X-CSRF-Token",
 		AllowCredentials: true,
