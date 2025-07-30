@@ -17,6 +17,7 @@ type RateLimitConfig struct {
 	Limit        int
 	Window       time.Duration
 	RedisCluster RedisClusterConfig
+	FailOpen     bool // if true, allow requests even if Redis is down
 }
 
 type RedisClusterConfig struct {
@@ -31,6 +32,7 @@ type ConfigKey struct {
 	ShardKey string        // the Redis shard URL
 	Limit    int           // number of allowed requests per window
 	Window   time.Duration // time window duration (e.g. 1m, 10s)
+	FailOpen bool          // if true, allow requests even if Redis is down
 }
 
 type Limiter struct {
@@ -78,6 +80,7 @@ func GetLimiterForKey(apiKey, endpoint, userKey string, baseConfig RateLimitConf
 		ShardKey: redisURL,
 		Limit:    baseConfig.Limit,
 		Window:   baseConfig.Window,
+		FailOpen: baseConfig.FailOpen,
 	}
 
 	mu.Lock()
@@ -93,6 +96,7 @@ func GetLimiterForKey(apiKey, endpoint, userKey string, baseConfig RateLimitConf
 		Limit:    baseConfig.Limit,
 		Window:   baseConfig.Window,
 		RedisURL: os.Getenv("REDISCLOUD_URL"),
+		FailOpen: baseConfig.FailOpen,
 	})
 	if err != nil {
 		return nil, err

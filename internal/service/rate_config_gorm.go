@@ -42,6 +42,7 @@ func (s *RateConfigService) Get(apiKey, endpoint string) (limiter.RateLimitConfi
 			},
 			Strategy: getEnvOrDefault("SHARDING_STRATEGY", "hash_mod"),
 		},
+		FailOpen: rl.FailOpen,
 	}, nil
 }
 

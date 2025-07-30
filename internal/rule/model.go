@@ -10,5 +10,6 @@ type Rule struct {
 	KeyBy         string    `json:"key_by"`   // api_key | ip | user_id
 	LimitCount    int       `json:"limit_count"`
 	WindowSeconds int       `json:"window_seconds"`
+	FailOpen      bool      `json:"fail_open"` // if true, allow requests even if rate limit is exceeded
 	CreatedAt     time.Time `json:"created_at"`
 }
