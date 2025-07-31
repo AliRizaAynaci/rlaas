@@ -53,7 +53,7 @@ func InitSharding() {
 		getEnvOrDefault("REDIS_NODE_3", "redis://localhost:6381/0"),
 	}
 
-	// Boş node'ları filtrele
+	// Clean up empty nodes
 	var validNodes []string
 	for _, node := range nodes {
 		if node != "" {
